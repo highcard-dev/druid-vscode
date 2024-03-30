@@ -7,7 +7,7 @@
   ],
   "scripts": {
     "build": "node build.js",
-    "prepare": "node prepare-drd-vscode.js",
+    "prepare-start": "node prepare-drd-vscode.js",
     "start": "cd drd-vscode && npm run start"
   },
   "repository": {
