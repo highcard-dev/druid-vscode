@@ -8,5 +8,8 @@
     "build": "node build.js",
     "prepare-start": "node prepare-drd-vscode.js",
     "start": "cd drd-vscode && npm run start"
+  },
+  "devDependencies": {
+    "fs-extra": "^11.2.0"
   }
 }
