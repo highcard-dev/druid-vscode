@@ -13,10 +13,13 @@
 		<!-- Disable pinch zooming -->
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
 
+		<!-- Workbench Configuration -->
+		<meta id="vscode-workbench-web-configuration" data-settings='{"configurationDefaults": { "druidfsprovider.apikey": "lol", "workbench.colorTheme": "Default Dark+" }}'>
+		<meta id="vscode-workbench-web-secrets" data-settings='{"{\"extensionId\":\"druid.fsprovider\",\"key\":\"druidfsprovider.apikey\"}":"<%= apiKey %>", "{\"extensionId\":\"druid.fsprovider\",\"key\":\"druidfsprovider.webdavUrl\"}":"https://gameservers.druid.gg/<%= deploymentId %>-webdav/"}'>
 		<!-- Workbench Icon/Manifest/CSS -->
 		<link rel="icon" href="/favicon.ico" type="image/x-icon" />
 		<link rel="manifest" href="/manifest.json">
-		<link data-name="vs/workbench/workbench.web.main" rel="stylesheet" href="./static/out/vs/workbench/workbench.web.main.css">
+		<link data-name="vs/workbench/workbench.web.main" rel="stylesheet" href="/static/out/vs/workbench/workbench.web.main.css">
 
 	</head>
 
@@ -24,8 +27,8 @@
 	</body>
 
 	<!-- Startup (do not modify order of script tags!) -->
-	<script src="./static/out/vs/loader.js"></script>
-	<script src="./static/out/vs/webPackagePaths.js"></script>
+	<script src="/static/out/vs/loader.js"></script>
+	<script src="/static/out/vs/webPackagePaths.js"></script>
 	<script>
 		Object.keys(self.webPackagePaths).map(function (key, index) {
 			self.webPackagePaths[key] = `${window.location.origin}/static/node_modules/${key}/${self.webPackagePaths[key]}`;
@@ -41,7 +44,7 @@
 			paths: self.webPackagePaths
 		});
 	</script>
-	<script src="./static/out/vs/workbench/workbench.web.main.nls.js"></script>
-	<script src="./static/out/vs/workbench/workbench.web.main.js"></script>
-	<script src="./static/out/vs/code/browser/workbench/workbench.js"></script>
+	<script src="/static/out/vs/workbench/workbench.web.main.nls.js"></script>
+	<script src="/static/out/vs/workbench/workbench.web.main.js"></script>
+	<script src="/static/out/vs/code/browser/workbench/workbench.js"></script>
 </html>

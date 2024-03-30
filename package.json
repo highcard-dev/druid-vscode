@@ -2,11 +2,13 @@
   "name": "vscode-web",
   "version": "1.84.2",
   "description": "Visual Studio Code for browser",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "node build.js",
-    "prepare-demo": "node prepare-demo.js",
-    "demo": "node ./demo/http.js"
+    "prepare": "node prepare-drd-vscode.js",
+    "start": "cd drd-vscode && npm run start"
   },
   "repository": {
     "type": "git",
@@ -22,5 +24,7 @@
     "express": "^4.17.1",
     "fs-extra": "^9.0.1"
   },
-  "dependencies": {}
+  "dependencies": {
+    "ejs": "^3.1.9"
+  }
 }

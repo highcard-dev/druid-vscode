@@ -1,10 +1,88 @@
-import {
-  create
-} from "vs/workbench/workbench.web.main";
+import { create } from "vs/workbench/workbench.web.main";
 import { URI, UriComponents } from "vs/base/common/uri";
-import { IWorkbenchConstructionOptions } from "vs/workbench/browser/web.api";
-import { IWorkspace, IWorkspaceProvider } from "vs/workbench/services/host/browser/browserHostService";
+import {
+  ColorScheme,
+  IWorkbenchConstructionOptions,
+} from "vs/workbench/browser/web.api";
+import { IWorkspace, IWorkspaceProvider } from "vs/workbench/browser/web.api";
+import { ISecretStorageProvider } from "vs/platform/secrets/common/secrets";
+
 declare const window: any;
+
+export class LocalStorageSecretStorageProvider
+  implements ISecretStorageProvider
+{
+  private readonly _storageKey = "secrets.provider";
+
+  private _secretsPromise: Promise<Record<string, string>> = this.load();
+
+  type: "in-memory" | "persisted" | "unknown" = "persisted";
+
+  private async load(): Promise<Record<string, string>> {
+    const record = this.loadAdditionalSecrets();
+    // Get the secrets from localStorage
+    const encrypted = localStorage.getItem(this._storageKey);
+    if (encrypted) {
+      try {
+        const decrypted = JSON.parse(encrypted);
+        return { ...record, ...decrypted };
+      } catch (err) {
+        // TODO: send telemetry
+        console.error("Failed to decrypt secrets from localStorage", err);
+        localStorage.removeItem(this._storageKey);
+      }
+    }
+
+    return record;
+  }
+
+  private loadAdditionalSecrets(): Record<string, string> {
+    const configElement = window.document.getElementById(
+      "vscode-workbench-web-secrets"
+    );
+    const configElementAttribute = configElement
+      ? configElement.getAttribute("data-settings")
+      : undefined;
+    let records = {};
+    if (!configElement || !configElementAttribute) {
+      console.warn("Missing web configuration element");
+    } else {
+      records = JSON.parse(configElementAttribute);
+      console.log("Overwrite", records);
+
+      //delete element for security reasons
+      configElement.remove();
+    }
+    return records;
+  }
+
+  async get(key: string): Promise<string | undefined> {
+    const secrets = await this._secretsPromise;
+    debugger;
+    return secrets[key];
+  }
+  async set(key: string, value: string): Promise<void> {
+    const secrets = await this._secretsPromise;
+    secrets[key] = value;
+    this._secretsPromise = Promise.resolve(secrets);
+    this.save();
+  }
+  async delete(key: string): Promise<void> {
+    const secrets = await this._secretsPromise;
+    delete secrets[key];
+    this._secretsPromise = Promise.resolve(secrets);
+    this.save();
+  }
+
+  private async save(): Promise<void> {
+    try {
+      const encrypted = JSON.stringify(await this._secretsPromise);
+      localStorage.setItem(this._storageKey, encrypted);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+}
 
 (async function () {
   // create workbench
@@ -47,12 +125,38 @@ declare const window: any;
       ) => true,
       trusted: true,
     };
-    config = { ...config, workspaceProvider };
+
+    const configElement = window.document.getElementById(
+      "vscode-workbench-web-configuration"
+    );
+    const configElementAttribute = configElement
+      ? configElement.getAttribute("data-settings")
+      : undefined;
+    let overwrite = {};
+    if (!configElement || !configElementAttribute) {
+      console.warn("Missing web configuration element");
+    } else {
+      overwrite = JSON.parse(configElementAttribute);
+      console.log("Overwrite", overwrite);
+    }
+
+    config = {
+      ...config,
+      ...overwrite,
+      workspaceProvider,
+      initialColorTheme: {
+        themeType: ColorScheme.DARK,
+      },
+      configurationDefaults: {
+        "druidfsprovider.apikey": "lol",
+        "workbench.colorTheme": "Default Dark+", // Default Dark+
+      },
+      secretStorageProvider: new LocalStorageSecretStorageProvider(),
+    };
   }
 
-  const domElement = !!config.domElementId
-    && document.getElementById(config.domElementId)
-    || document.body;
-
+  const domElement =
+    (!!config.domElementId && document.getElementById(config.domElementId)) ||
+    document.body;
   create(domElement, config);
 })();

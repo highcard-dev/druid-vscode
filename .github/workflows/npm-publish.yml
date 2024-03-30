@@ -15,16 +15,11 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 18
-          registry-url: https://registry.npmjs.org/
       - name: Setup Build Environment
         run: |
-            sudo apt-get update
-            sudo apt-get install -y build-essential g++ libx11-dev libxkbfile-dev libsecret-1-dev libkrb5-dev python-is-python3
+          sudo apt-get update
+          sudo apt-get install -y build-essential g++ libx11-dev libxkbfile-dev libsecret-1-dev libkrb5-dev python-is-python3
       - name: install
         run: yarn
       - name: build
         run: yarn build
-      - name: publish
-        run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}

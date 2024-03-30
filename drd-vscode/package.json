@@ -1,0 +1,16 @@
+{
+  "name": "drd-vscode",
+  "version": "1.84.2",
+  "description": "Visual Studio Code for browser",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "start": "node http.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "fs-extra": "^9.0.1",
+    "ejs": "^3.1.9"
+  }
+}
