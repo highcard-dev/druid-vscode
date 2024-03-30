@@ -1,0 +1,25 @@
+name: Vercel Production Deployment
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+on:
+  push:
+    branches:
+      - main
+jobs:
+  Deploy-Production:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install deps
+        run: apt-get install -y libkrb5-dev
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+      - name: Install
+        run: yarn install
+      - name: Build
+        run: yarn build
+      - name: Copy files into final directory
+        run: yarn prepare-start
+      - name: Deploy Project Artifacts to Vercel
+        run: vercel deploy drd-vscode --prod --token=${{ secrets.VERCEL_TOKEN }}
