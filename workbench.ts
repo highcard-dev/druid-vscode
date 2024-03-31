@@ -141,7 +141,13 @@ export class LocalStorageSecretStorageProvider
     const tempConfig = { ...config };
 
     tempConfig.additionalBuiltinExtensions =
-      config.additionalBuiltinExtensions.map((ext) => URI.revive(ext));
+      config.additionalBuiltinExtensions.map((ext) => {
+        //fix https scheme
+        if (ext.scheme === "http" && window.location.protocol === "https:") {
+          ext.scheme = "https";
+        }
+        return URI.revive(ext);
+      });
     config = tempConfig;
   }
 
@@ -184,10 +190,6 @@ export class LocalStorageSecretStorageProvider
       workspaceProvider,
       initialColorTheme: {
         themeType: ColorScheme.DARK,
-      },
-      configurationDefaults: {
-        "druidfsprovider.apikey": "lol",
-        "workbench.colorTheme": "Default Dark+", // Default Dark+
       },
       secretStorageProvider: new LocalStorageSecretStorageProvider(),
     };
