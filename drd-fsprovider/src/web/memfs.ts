@@ -17,7 +17,7 @@ import {
   workspace,
 } from "vscode";
 
-import { createDAVClient } from "tsdav";
+import { XMLParser } from "fast-xml-parser";
 
 export class File implements FileStat {
   type: FileType;
@@ -78,96 +78,95 @@ export class MemFS implements FileSystemProvider, Disposable {
     this.disposable?.dispose();
   }
 
-  async getDAVClient() {
-    console.log("Creating DAV client");
-    console.log("==================================================00");
+  async davRequest(path: string, options: RequestInit) {
+    const username = "apikey";
+    const password = this.apiKey;
 
-    return createDAVClient({
-      serverUrl: this.wedavUrl,
-      credentials: {
-        username: "apikey",
-        password: this.apiKey,
-      },
-      authMethod: "Basic",
+    const req = await fetch(this.wedavUrl + path, {
+      ...options,
+      headers: new Headers({
+        ...(options.headers || {}),
+        Authorization: "Basic " + btoa(username + ":" + password),
+      }),
     });
+
+    if (req.status === 404) {
+      throw FileSystemError.FileNotFound();
+    }
+
+    if (!req.ok) {
+      throw new Error("Failed to read directory");
+    }
+    return req;
   }
 
   async readDavDirectory(path = "/") {
-    const client = await this.getDAVClient();
-    return await client.davRequest({
-      url: this.wedavUrl + path,
-      convertIncoming: false,
-      init: {
-        method: "PROPFIND",
-        headers: {
-          Depth: "1",
-        },
-        body: "",
+    const req = await this.davRequest(path, {
+      headers: {
+        Depth: "1",
       },
+      method: "PROPFIND",
+      body: `<?xml version="1.0" encoding="utf-8" ?>
+<propfind xmlns="DAV:">
+  <prop>
+    <getlastmodified xmlns="DAV:"/>
+    <getcontentlength xmlns="DAV:"/>
+    <resourcetype xmlns="DAV:"/>
+  </prop>
+</propfind>`,
     });
-  }
 
-  async writeDavFile(path = "/", data: Uint8Array) {
-    const client = await this.getDAVClient();
+    const text = await req.text();
+    const parser = new XMLParser();
+    //xmt to js object
+    const obj = parser.parse(text);
+    //console.log(obj);
     //debugger;
-    return await client.davRequest({
-      url: this.wedavUrl + path,
-      convertIncoming: false,
-      init: {
-        method: "PUT",
-        body: data,
-      },
-    });
-  }
+    let list = obj["D:multistatus"]["D:response"];
 
-  async readDavFile(path = "/") {
-    const client = await this.getDAVClient();
-    return await client.davRequest({
-      url: this.wedavUrl + path,
-      convertIncoming: false,
-      init: {
-        method: "GET",
-        body: undefined,
-      },
-    });
+    if (!Array.isArray(list)) {
+      list = [list];
+    }
+
+    //console.log(list);
+    return list.map((item: any) => {
+      const href = item["D:href"];
+      let propstat = item["D:propstat"];
+
+      if (!Array.isArray(propstat)) {
+        propstat = [propstat];
+      }
+
+      const isDir = !!propstat.find((ps: any) => {
+        return ps["D:prop"]?.["D:resourcetype"]?.["D:collection"] !== undefined;
+      });
+
+      let size = undefined;
+      if (!isDir) {
+        const sizeNode = propstat.find((ps: any) => {
+          return ps["D:prop"]?.["D:getcontentlength"] !== undefined;
+        });
+        if (sizeNode) {
+          size = sizeNode["D:prop"]["D:getcontentlength"];
+        } else {
+          size = 0;
+        }
+      }
+
+      return {
+        href: href,
+        size: size,
+        isDir: isDir,
+      };
+    }) as any[];
   }
 
   async moveDavFile(path = "/", newPath = "/") {
-    const client = await this.getDAVClient();
     //debugger;
-    return await client.davRequest({
-      url: this.wedavUrl + path,
-      convertIncoming: false,
-      init: {
-        method: "MOVE",
-        headers: {
-          Destination: newPath,
-        },
-        body: undefined,
-      },
-    });
-  }
-
-  async createDavDirectory(path = "/") {
-    const client = await this.getDAVClient();
-    return await client.davRequest({
-      url: this.wedavUrl + path,
-      convertIncoming: false,
-      init: {
-        method: "MKCOL",
-        body: undefined,
-      },
-    });
-  }
-
-  async deleteDavFile(path = "/") {
-    const client = await this.getDAVClient();
-    return await client.davRequest({
-      url: this.wedavUrl + path,
-      convertIncoming: false,
-      init: {
-        method: "DELETE",
-        body: undefined,
+    return await this.davRequest(path, {
+      method: "MOVE",
+      headers: {
+        Destination: newPath,
       },
     });
   }
@@ -179,15 +178,12 @@ export class MemFS implements FileSystemProvider, Disposable {
   async stat(uri: Uri): Promise<FileStat> {
     const data = await this.readDavDirectory(uri.path);
 
-    if (data?.[0]?.raw !== undefined && data[0].ok) {
+    if (data[0]) {
       return {
-        type:
-          data.length === 1 && data[0]?.props?.getcontentlength !== undefined
-            ? FileType.File
-            : FileType.Directory,
+        type: !data[0]?.isDir ? FileType.File : FileType.Directory,
         ctime: 0,
         mtime: 0,
-        size: 0,
+        size: data[0]?.size || 0,
       };
     }
     throw FileSystemError.FileNotFound();
@@ -199,29 +195,26 @@ export class MemFS implements FileSystemProvider, Disposable {
     const filtered = list
       .filter((item) => item.href !== uri.path)
       .filter((item) => item.href !== uri.path + "/")
-      .filter((item) => item.ok)
       .map(
         (item) =>
-          [
-            item.href || "",
-            item?.props?.getcontentlength !== undefined
-              ? FileType.File
-              : FileType.Directory,
-          ] as [string, FileType]
+          [item.href, !item.isDir ? FileType.File : FileType.Directory] as [
+            string,
+            FileType
+          ]
       );
-    console.log(filtered);
     return filtered;
   }
 
   // --- manage file contents
 
   async readFile(uri: Uri): Promise<Uint8Array> {
-    const data = await this.readDavFile(uri.path);
+    const res = await this.davRequest(uri.path, {
+      method: "GET",
+      body: undefined,
+    });
 
-    if (data?.[0]?.raw !== undefined && data[0].ok) {
-      return textEncoder.encode(data[0].raw);
-    }
-    throw FileSystemError.FileNotFound();
+    const arrayBuffer = await res.arrayBuffer();
+    return new Uint8Array(arrayBuffer);
   }
 
   async writeFile(
@@ -229,21 +222,33 @@ export class MemFS implements FileSystemProvider, Disposable {
     content: Uint8Array,
     options: { create: boolean; overwrite: boolean }
   ) {
-    await this.writeDavFile(uri.path, content);
+    await this.davRequest(uri.path, {
+      method: "PUT",
+      body: content,
+    });
   }
 
   // --- manage files/folders
 
   async rename(oldUri: Uri, newUri: Uri, options: { overwrite: boolean }) {
-    await this.moveDavFile(oldUri.path, newUri.path);
+    await this.davRequest(oldUri.path, {
+      method: "MOVE",
+      headers: {
+        Destination: newUri.path,
+      },
+    });
   }
 
   async delete(uri: Uri) {
-    await this.deleteDavFile(uri.path);
+    await this.davRequest(uri.path, {
+      method: "DELETE",
+    });
   }
 
   async createDirectory(uri: Uri) {
-    await this.createDavDirectory(uri.path);
+    await this.davRequest(uri.path, {
+      method: "MKCOL",
+    });
   }
 
   onDidChangeFile() {
