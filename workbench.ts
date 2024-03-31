@@ -96,7 +96,7 @@ export class LocalStorageSecretStorageProvider
 
   async get(key: string): Promise<string | undefined> {
     const secrets = await this._secretsPromise;
-    debugger;
+    //debugger;
     return secrets[key];
   }
   async set(key: string, value: string): Promise<void> {

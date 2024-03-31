@@ -66,7 +66,7 @@ export class MemFS implements FileSystemProvider, Disposable {
   private readonly disposable: Disposable;
 
   constructor(private wedavUrl: string, private apiKey: string) {
-    debugger;
+    //debugger;
     this.disposable = Disposable.from(
       workspace.registerFileSystemProvider(MemFS.scheme, this, {
         isCaseSensitive: true,
@@ -109,7 +109,7 @@ export class MemFS implements FileSystemProvider, Disposable {
 
   async writeDavFile(path = "/", data: Uint8Array) {
     const client = await this.getDAVClient();
-    debugger;
+    //debugger;
     return await client.davRequest({
       url: this.wedavUrl + path,
       convertIncoming: false,
@@ -134,7 +134,7 @@ export class MemFS implements FileSystemProvider, Disposable {
 
   async moveDavFile(path = "/", newPath = "/") {
     const client = await this.getDAVClient();
-    debugger;
+    //debugger;
     return await client.davRequest({
       url: this.wedavUrl + path,
       convertIncoming: false,

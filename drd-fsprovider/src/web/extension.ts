@@ -16,7 +16,7 @@ import * as vscode from "vscode";
 import { MemFS } from "./memfs";
 
 export async function activate(context: vscode.ExtensionContext) {
-  debugger;
+  //debugger;
   const apikey = await context.secrets.get("druidfsprovider.apikey");
   const webdavUrl = await context.secrets.get("druidfsprovider.webdavUrl");
   if (!apikey || !webdavUrl) {
