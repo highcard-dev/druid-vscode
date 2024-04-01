@@ -15,19 +15,43 @@
 import * as vscode from "vscode";
 import { MemFS } from "./memfs";
 
+function isValidHttpUrl(str: string) {
+  let url;
+
+  try {
+    url = new URL(str);
+  } catch (_) {
+    return false;
+  }
+
+  return url.protocol === "http:" || url.protocol === "https:";
+}
+
 export async function activate(context: vscode.ExtensionContext) {
   //debugger;
-  const apikey = await context.secrets.get("druidfsprovider.apikey");
-  const webdavUrl = await context.secrets.get("druidfsprovider.webdavUrl");
+  let apikey = await context.secrets.get("druidfsprovider.apikey");
+  let webdavUrl = await context.secrets.get("druidfsprovider.webdavUrl");
+
   if (!apikey || !webdavUrl) {
-    vscode.window.showErrorMessage(
-      "Please set the apikey and webdavUrl in the secrets."
-    );
-    return;
+    while (!webdavUrl || !isValidHttpUrl(webdavUrl)) {
+      webdavUrl = await vscode.window.showInputBox({
+        placeHolder: "Enter the webdavUrl ",
+        prompt: "Enter the webdavUrl",
+        validateInput(value) {
+          return isValidHttpUrl(value) ? "" : "Invalid URL";
+        },
+      });
+    }
+    while (!apikey) {
+      apikey = await vscode.window.showInputBox({
+        placeHolder: "Enter the apikey ",
+        prompt: "Enter the apikey",
+      });
+    }
   }
-  const memFs = enableFs(context, webdavUrl, apikey);
   try {
     vscode.window.showInformationMessage("Connecting to remote server...");
+    const memFs = await enableFs(context, webdavUrl, apikey);
     /*
     vscode.commands.executeCommand(
       "vscode.open",
@@ -35,19 +59,32 @@ export async function activate(context: vscode.ExtensionContext) {
     );*/
     vscode.window.showInformationMessage("Connected to remote server.");
   } catch (e) {
-    console.error(e);
-    vscode.window.showErrorMessage(`Error: ${e}`);
+    const error = e as Error;
+    //error pops up a message box with the error message,
+    //if the connection to the remote server fails
+
+    vscode.window.showErrorMessage(
+      "Failed to connect to remote server: " + error.message,
+      { modal: true }
+    );
+    activate(context);
   }
 }
 
-function enableFs(
+async function enableFs(
   context: vscode.ExtensionContext,
   webdavUrl: string,
   apiKey: string
-): MemFS {
-  console.log("Enabling FS");
+): Promise<MemFS> {
   const memFs = new MemFS(webdavUrl, apiKey);
-  context.subscriptions.push(memFs);
 
-  return memFs;
+  try {
+    await memFs.readDavDirectory("/");
+    context.subscriptions.push(memFs);
+
+    return memFs;
+  } catch (e) {
+    memFs.dispose();
+    throw e;
+  }
 }

@@ -6,7 +6,8 @@
     "dist"
   ],
   "scripts": {
-    "start": "node http.js"
+    "start-server": "node http.js",
+    "start-static": "serve . -p 8089"
   },
   "dependencies": {
     "ejs": "^3.1.9",
