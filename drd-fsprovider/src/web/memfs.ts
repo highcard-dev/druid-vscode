@@ -195,13 +195,18 @@ export class MemFS implements FileSystemProvider, Disposable {
     const filtered = list
       .filter((item) => item.href !== uri.path)
       .filter((item) => item.href !== uri.path + "/")
-      .map(
-        (item) =>
-          [item.href, !item.isDir ? FileType.File : FileType.Directory] as [
-            string,
-            FileType
-          ]
-      );
+      .map((item) => {
+        let fullpath = item.href;
+
+        if (fullpath.endsWith("/")) {
+          fullpath = fullpath.slice(0, -1);
+        }
+
+        return [
+          fullpath.split("/").pop(),
+          !item.isDir ? FileType.File : FileType.Directory,
+        ] as [string, FileType];
+      });
     return filtered;
   }
 
