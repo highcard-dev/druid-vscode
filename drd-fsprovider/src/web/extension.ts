@@ -30,9 +30,10 @@ function isValidHttpUrl(str: string) {
 export async function activate(context: vscode.ExtensionContext) {
   //debugger;
   let apikey = await context.secrets.get("druidfsprovider.apikey");
+  let accessToken = await context.secrets.get("druidfsprovider.accessToken");
   let webdavUrl = await context.secrets.get("druidfsprovider.webdavUrl");
 
-  if (!apikey || !webdavUrl) {
+  if ((!apikey && !accessToken) || !webdavUrl) {
     while (!webdavUrl || !isValidHttpUrl(webdavUrl)) {
       webdavUrl = await vscode.window.showInputBox({
         placeHolder: "Enter the webdavUrl ",

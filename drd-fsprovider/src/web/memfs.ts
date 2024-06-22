@@ -65,7 +65,14 @@ export class MemFS implements FileSystemProvider, Disposable {
 
   private readonly disposable: Disposable;
 
-  constructor(private wedavUrl: string, private apiKey: string) {
+  constructor(
+    private wedavUrl: string,
+    private authenticationCredentials?: {
+      //apikeys are for e.g. legacy webdav servers on druid.gg
+      apikey?: string;
+      accessToken?: string;
+    }
+  ) {
     //debugger;
     this.disposable = Disposable.from(
       workspace.registerFileSystemProvider(MemFS.scheme, this, {
@@ -78,15 +85,25 @@ export class MemFS implements FileSystemProvider, Disposable {
     this.disposable?.dispose();
   }
 
-  async davRequest(path: string, options: RequestInit) {
-    const username = "apikey";
-    const password = this.apiKey;
+  private getAuthHeader() {
+    if (this.authenticationCredentials?.accessToken) {
+      return "Bearer " + this.authenticationCredentials.accessToken;
+    }
+    if (this.authenticationCredentials?.apikey) {
+      const username = "apikey";
+      const password = this.authenticationCredentials.apikey;
+      return "Basic " + btoa(username + ":" + password);
+    }
+    return undefined;
+  }
 
+  async davRequest(path: string, options: RequestInit) {
+    const authHeader = this.getAuthHeader();
     const req = await fetch(this.wedavUrl + path, {
       ...options,
       headers: new Headers({
         ...(options.headers || {}),
-        Authorization: "Basic " + btoa(username + ":" + password),
+        ...(authHeader ? { Authorization: authHeader } : {}),
       }),
     });
 
