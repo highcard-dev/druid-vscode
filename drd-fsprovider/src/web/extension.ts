@@ -13,7 +13,7 @@
 //
 
 import * as vscode from "vscode";
-import { MemFS } from "./memfs";
+import { AuthenticationCredentials, MemFS } from "./memfs";
 
 function isValidHttpUrl(str: string) {
   let url;
@@ -52,7 +52,7 @@ export async function activate(context: vscode.ExtensionContext) {
   }
   try {
     vscode.window.showInformationMessage("Connecting to remote server...");
-    const memFs = await enableFs(context, webdavUrl, apikey);
+    const memFs = await enableFs(context, webdavUrl, { apikey, accessToken });
     /*
     vscode.commands.executeCommand(
       "vscode.open",
@@ -75,9 +75,9 @@ export async function activate(context: vscode.ExtensionContext) {
 async function enableFs(
   context: vscode.ExtensionContext,
   webdavUrl: string,
-  apiKey: string
+  credentials?: AuthenticationCredentials
 ): Promise<MemFS> {
-  const memFs = new MemFS(webdavUrl, apiKey);
+  const memFs = new MemFS(webdavUrl, credentials);
 
   try {
     await memFs.readDavDirectory("/");

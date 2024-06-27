@@ -19,6 +19,11 @@ import {
 
 import { XMLParser } from "fast-xml-parser";
 
+export interface AuthenticationCredentials {
+  apikey?: string;
+  accessToken?: string;
+}
+
 export class File implements FileStat {
   type: FileType;
   ctime: number;
@@ -67,11 +72,7 @@ export class MemFS implements FileSystemProvider, Disposable {
 
   constructor(
     private wedavUrl: string,
-    private authenticationCredentials?: {
-      //apikeys are for e.g. legacy webdav servers on druid.gg
-      apikey?: string;
-      accessToken?: string;
-    }
+    private authenticationCredentials?: AuthenticationCredentials
   ) {
     //debugger;
     this.disposable = Disposable.from(
