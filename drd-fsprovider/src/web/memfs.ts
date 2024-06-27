@@ -5,7 +5,6 @@
 
 import {
   Disposable,
-  Event,
   EventEmitter,
   FileChangeEvent,
   FileStat,
@@ -13,7 +12,6 @@ import {
   FileSystemProvider,
   FileType,
   Uri,
-  window,
   workspace,
 } from "vscode";
 
