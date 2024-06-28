@@ -5,6 +5,11 @@
     "applicationName": "code-web",
     "dataFolderName": ".vscode-web",
     "version": "1.87.2",
+    "extensionsGallery": {
+      "serviceUrl": "https://open-vsx.org/vscode/gallery",
+      "itemUrl": "https://open-vsx.org/vscode/item",
+      "resourceUrlTemplate": "https://openvsxorg.blob.core.windows.net/resources/{publisher}/{name}/{version}/{path}"
+    },
     "extensionEnabledApiProposals": {
       "vscode.vscode-web-playground": [
         "fileSearchProvider",
@@ -19,7 +24,7 @@
   "additionalBuiltinExtensions": [
     {
       "scheme": "http",
-      "path": "/static/extensions/vscode-web-playground"
+      "path": "/static/extensions/webdav-fsprovider"
     }
   ]
 }

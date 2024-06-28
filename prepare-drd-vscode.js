@@ -10,8 +10,7 @@ fse.copySync("./dist/extensions", "./drd-vscode/static/extensions");
 fse.copySync("./dist/node_modules", "./drd-vscode/static/node_modules");
 fse.copySync("./dist/out", "./drd-vscode/static/out");
 
-const webPlaygroundPath =
-  "./drd-vscode/static/extensions/vscode-web-playground";
+const webPlaygroundPath = "./drd-vscode/static/extensions/webdav-fsprovider";
 
 child_process.execSync(`bash -c 'cd drd-fsprovider && npm run compile-web'`, {
   stdio: "inherit",

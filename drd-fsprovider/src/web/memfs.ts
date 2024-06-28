@@ -17,9 +17,10 @@ import {
 
 import { XMLParser } from "fast-xml-parser";
 
-export interface AuthenticationCredentials {
-  apikey?: string;
+export interface WebDavOptions {
+  basicAuthApikey?: string;
   accessToken?: string;
+  prefix?: string;
 }
 
 export class File implements FileStat {
@@ -65,14 +66,14 @@ const textEncoder = new TextEncoder();
 
 export class MemFS implements FileSystemProvider, Disposable {
   static scheme = "memfs";
+  private wedavUrl: string;
 
   private readonly disposable: Disposable;
 
-  constructor(
-    private wedavUrl: string,
-    private authenticationCredentials?: AuthenticationCredentials
-  ) {
-    //debugger;
+  constructor(wedavUrl: string, private webdavOptions?: WebDavOptions) {
+    //set the webdav url but strip the trailing slash, if any
+    this.wedavUrl = wedavUrl.replace(/\/$/, "");
+
     this.disposable = Disposable.from(
       workspace.registerFileSystemProvider(MemFS.scheme, this, {
         isCaseSensitive: true,
@@ -85,12 +86,12 @@ export class MemFS implements FileSystemProvider, Disposable {
   }
 
   private getAuthHeader() {
-    if (this.authenticationCredentials?.accessToken) {
-      return "Bearer " + this.authenticationCredentials.accessToken;
+    if (this.webdavOptions?.accessToken) {
+      return "Bearer " + this.webdavOptions.accessToken;
     }
-    if (this.authenticationCredentials?.apikey) {
+    if (this.webdavOptions?.basicAuthApikey) {
       const username = "apikey";
-      const password = this.authenticationCredentials.apikey;
+      const password = this.webdavOptions.basicAuthApikey;
       return "Basic " + btoa(username + ":" + password);
     }
     return undefined;
@@ -98,7 +99,12 @@ export class MemFS implements FileSystemProvider, Disposable {
 
   async davRequest(path: string, options: RequestInit) {
     const authHeader = this.getAuthHeader();
-    const req = await fetch(this.wedavUrl + path, {
+
+    const { prefix = "" } = this.webdavOptions || {};
+
+    const base = this.wedavUrl + prefix;
+
+    const req = await fetch(base + path, {
       ...options,
       headers: new Headers({
         ...(options.headers || {}),
@@ -177,16 +183,6 @@ export class MemFS implements FileSystemProvider, Disposable {
     }) as any[];
   }
 
-  async moveDavFile(path = "/", newPath = "/") {
-    //debugger;
-    return await this.davRequest(path, {
-      method: "MOVE",
-      headers: {
-        Destination: newPath,
-      },
-    });
-  }
-
   root = new Directory(Uri.parse("memfs:/"), "");
 
   // --- manage file metadata
@@ -208,9 +204,13 @@ export class MemFS implements FileSystemProvider, Disposable {
   async readDirectory(uri: Uri): Promise<[string, FileType][]> {
     const list = await this.readDavDirectory(uri.path);
 
+    const { prefix = "" } = this.webdavOptions || {};
+
     const filtered = list
-      .filter((item) => item.href !== uri.path)
-      .filter((item) => item.href !== uri.path + "/")
+      .filter((item) => !!prefix && item.href !== prefix)
+      .filter((item) => !!prefix && item.href !== prefix + "/")
+      .filter((item) => item.href !== prefix + uri.path)
+      .filter((item) => item.href !== prefix + uri.path + "/")
       .map((item) => {
         let fullpath = item.href;
 
@@ -252,10 +252,12 @@ export class MemFS implements FileSystemProvider, Disposable {
   // --- manage files/folders
 
   async rename(oldUri: Uri, newUri: Uri, options: { overwrite: boolean }) {
+    const { prefix = "" } = this.webdavOptions || {};
+
     await this.davRequest(oldUri.path, {
       method: "MOVE",
       headers: {
-        Destination: newUri.path,
+        Destination: prefix + newUri.path,
       },
     });
   }

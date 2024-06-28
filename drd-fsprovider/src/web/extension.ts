@@ -13,7 +13,7 @@
 //
 
 import * as vscode from "vscode";
-import { AuthenticationCredentials, MemFS } from "./memfs";
+import { WebDavOptions, MemFS } from "./memfs";
 
 function isValidHttpUrl(str: string) {
   let url;
@@ -32,6 +32,7 @@ export async function activate(context: vscode.ExtensionContext) {
   let apikey = await context.secrets.get("druidfsprovider.apikey");
   let accessToken = await context.secrets.get("druidfsprovider.accessToken");
   let webdavUrl = await context.secrets.get("druidfsprovider.webdavUrl");
+  let pathPrefix = await context.secrets.get("druidfsprovider.pathPrefix");
 
   if ((!apikey && !accessToken) || !webdavUrl) {
     while (!webdavUrl || !isValidHttpUrl(webdavUrl)) {
@@ -52,7 +53,11 @@ export async function activate(context: vscode.ExtensionContext) {
   }
   try {
     vscode.window.showInformationMessage("Connecting to remote server...");
-    const memFs = await enableFs(context, webdavUrl, { apikey, accessToken });
+    const memFs = await enableFs(context, webdavUrl, {
+      basicAuthApikey: apikey,
+      accessToken,
+      prefix: pathPrefix,
+    });
     /*
     vscode.commands.executeCommand(
       "vscode.open",
@@ -75,7 +80,7 @@ export async function activate(context: vscode.ExtensionContext) {
 async function enableFs(
   context: vscode.ExtensionContext,
   webdavUrl: string,
-  credentials?: AuthenticationCredentials
+  credentials?: WebDavOptions
 ): Promise<MemFS> {
   const memFs = new MemFS(webdavUrl, credentials);
 
