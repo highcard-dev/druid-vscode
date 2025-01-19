@@ -1,7 +1,4 @@
-name: Vercel Production Deployment
-env:
-  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+name: Cloudflare Production Deployment
 on:
   push:
     branches:
@@ -10,18 +7,18 @@ jobs:
   Deploy-Production:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Install deps
-        run: sudo apt-get install -y libkrb5-dev
-      - name: Install Vercel CLI
-        run: npm install --global vercel@latest
+      - uses: actions/checkout@v4
+      #- name: Install deps
+      #  run: sudo apt-get install -y libkrb5-dev
       - name: Install
         run: yarn install
-      - name: Install provider
-        run: cd drd-fsprovider && yarn install
-      - name: Build
-        run: yarn build
-      - name: Copy files into final directory
-        run: yarn prepare-start
-      - name: Deploy Project Artifacts to Vercel
-        run: vercel deploy drd-vscode --prod --token=${{ secrets.VERCEL_TOKEN }}
+      #- name: Install provider
+      #  run: cd drd-fsprovider && yarn install
+      #- name: Build
+      #  run: yarn build
+      #- name: Copy files into final directory
+      #  run: yarn prepare-start
+      - name: Deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}

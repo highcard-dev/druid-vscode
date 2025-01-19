@@ -1,7 +1,4 @@
-name: Vercel Preview Deployment
-env:
-  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+name: Cloudflare Preview Deployment
 on:
   push:
     branches-ignore:
@@ -21,5 +18,5 @@ jobs:
         run: yarn build
       - name: Copy files into final directory
         run: yarn prepare-start
-      - name: Deploy Project Artifacts to Vercel
-        run: vercel deploy drd-vscode --token=${{ secrets.VERCEL_TOKEN }}
+      #- name: Deploy Project Artifacts to Vercel
+      #  run: vercel deploy drd-vscode --token=${{ secrets.VERCEL_TOKEN }}

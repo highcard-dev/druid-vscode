@@ -8,9 +8,13 @@
     "build": "node build.js",
     "prepare-start": "node prepare-drd-vscode.js",
     "start-server": "cd drd-vscode && npm run start-server",
-    "start-static": "cd drd-vscode && npm run start-static"
+    "start-static": "cd drd-vscode && npm run start-static",
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "start": "wrangler dev"
   },
   "devDependencies": {
-    "fs-extra": "^11.2.0"
+    "fs-extra": "^11.2.0",
+    "wrangler": "^3.103.2"
   }
 }
