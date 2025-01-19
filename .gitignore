@@ -114,4 +114,4 @@ drd-vscode/manifest.json
 drd-vscode/playground.js
 
 .vscode-test-web
-.vercel
+.wrangler

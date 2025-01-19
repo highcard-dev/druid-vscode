@@ -7,7 +7,7 @@
   "name": "druid-vscode",
   "compatibility_date": "2025-01-09",
   "assets": {
-    "directory": "./druid"
+    "directory": "./dist"
   },
   "observability": {
     "enabled": true

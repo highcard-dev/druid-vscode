@@ -8,16 +8,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      #- name: Install deps
-      #  run: sudo apt-get install -y libkrb5-dev
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: Install deps
+        run: sudo apt-get install -y libkrb5-dev g++ gcc make pkg-config libx11-dev libxkbfile-dev libsecret-1-dev
       - name: Install
         run: yarn install
-      #- name: Install provider
-      #  run: cd drd-fsprovider && yarn install
-      #- name: Build
-      #  run: yarn build
-      #- name: Copy files into final directory
-      #  run: yarn prepare-start
+      - name: Install provider
+        run: cd drd-fsprovider && yarn install
+      - name: Build
+        run: yarn build
+      - name: Copy files into final directory
+        run: yarn prepare-start
       - name: Deploy
         uses: cloudflare/wrangler-action@v3
         with:
