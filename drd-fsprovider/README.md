@@ -1,19 +1,65 @@
-# MemFS
+# drd-fsprovider README
 
-This extension implements an in-memory file system to show-case the [filesystem provider api](https://github.com/Microsoft/vscode/blob/51a880315fd0ec2cafb511a17de48ec31802ba6d/src/vs/vscode.d.ts#L4968). It serves two purposes:
+This is the README for your extension "drd-fsprovider". After writing up a brief description, we recommend including the following sections.
 
-* Be a sample/reference for extension authors that want to implement a filesystem provider
-* Be a test for other extensions that *falsely* assume text document always live on disk.
+## Features
 
-To *get started* you need this:
+Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
 
-* install this extension
-* when *not* having a workspace opened, select 'F1 > [MemFS] Setup Workspace' (optionally save the workspace now)
-* select 'F1 > [MemFs] Create Files' and notice how the explorer is now populated
-* ... try things out, e.g. IntelliSense in memfs-files, create new files, save them, etc
-* open `file.txt` and make changes
-* 'F1 > [MemFS] Delete "file.txt', observe that the editor is now indicating that the file is deleted
-* 'F1 > [MemFS] Add "file.txt', observe that the editor content is reset and the '(delete)' annotation disappeared
-* select 'F1 > [MemFs] Delete Files' or reload to restart
+For example if there is an image subfolder under your extension project workspace:
 
-![sample screenshot](https://github.com/Microsoft/vscode-extension-samples/raw/main/fsprovider-sample/sample.png)
+\!\[feature X\]\(images/feature-x.png\)
+
+> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+
+## Requirements
+
+If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+
+## Extension Settings
+
+Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+
+For example:
+
+This extension contributes the following settings:
+
+* `myExtension.enable`: Enable/disable this extension.
+* `myExtension.thing`: Set to `blah` to do something.
+
+## Known Issues
+
+Calling out known issues can help limit users opening duplicate issues against your extension.
+
+## Release Notes
+
+Users appreciate release notes as you update your extension.
+
+### 1.0.0
+
+Initial release of ...
+
+### 1.0.1
+
+Fixed issue #.
+
+### 1.1.0
+
+Added features X, Y, and Z.
+
+---
+
+## Working with Markdown
+
+You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
+
+* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
+* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
+* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
+
+## For more information
+
+* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
+* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
+
+**Enjoy!**

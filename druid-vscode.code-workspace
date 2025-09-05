@@ -21,8 +21,8 @@
 			"path": "./druid"
 		},
 		{
-			"name": "🛠️ Utils",
-			"path": "./utils"
+			"name": "🛠️ WebDAV Utils",
+			"path": "./webdav-utils"
 		}
 	],
 }
