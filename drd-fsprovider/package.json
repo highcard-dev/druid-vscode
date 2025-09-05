@@ -1,61 +1,56 @@
 {
-  "name": "fsprovider",
-  "displayName": "Druid Filesystem",
-  "description": "",
-  "version": "0.0.1",
-  "publisher": "druid",
+  "name": "vscode-memfs",
+  "displayName": "MemFS - a file system provider sample",
+  "description": "Showcase for the file system provider API, also useful for testing again document that are not on disk.",
+  "version": "0.0.3",
+  "publisher": "vscode-samples",
+  "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Microsoft/vscode-extension-samples"
+  },
   "engines": {
-    "vscode": "^1.87.0"
+    "vscode": "^1.100.0"
   },
   "categories": [
     "Other"
   ],
   "activationEvents": [
-    "onFileSystem:memfs",
-    "onDebug"
+    "onFileSystem:memfs"
   ],
-  "browser": "./dist/web/extension.js",
+  "main": "./out/src/extension",
   "contributes": {
-    "configuration": {
-      "title": "Druid Filesystem",
-      "properties": {
-        "druidfsprovider.apikey": {
-          "type": "string",
-          "default": "",
-          "description": "API Key for Druid Filesystem"
-        }
+    "commands": [
+      {
+        "command": "memfs.workspaceInit",
+        "title": "Setup Workspace",
+        "category": "MemFS"
       }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "memfs.init",
+          "when": "workbenchState == workspace"
+        }
+      ]
     }
   },
   "scripts": {
-    "test": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=. --extensionTestsPath=dist/web/test/suite/index.js",
-    "pretest": "yarn run compile-web",
-    "vscode:prepublish": "yarn run package-web",
-    "compile-web": "webpack",
-    "watch-web": "webpack --watch",
-    "package-web": "webpack --mode production --devtool hidden-source-map",
-    "lint": "eslint src --ext ts",
-    "run-in-browser": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=. ."
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "lint": "eslint",
+    "watch": "tsc -watch -p ./"
   },
   "devDependencies": {
-    "@types/assert": "^1.5.10",
-    "@types/mocha": "^10.0.6",
-    "@types/vscode": "^1.87.0",
-    "@types/webpack-env": "^1.18.4",
-    "@typescript-eslint/eslint-plugin": "^7.0.2",
-    "@typescript-eslint/parser": "^7.0.2",
-    "@vscode/test-web": "^0.0.52",
-    "assert": "^2.1.0",
-    "eslint": "^8.56.0",
-    "mocha": "^10.3.0",
-    "process": "^0.11.10",
-    "ts-loader": "^9.5.1",
-    "typescript": "^5.3.3",
-    "webpack": "^5.90.3",
-    "webpack-cli": "^5.1.4"
-  },
-  "dependencies": {
-    "buffer": "^6.0.3",
-    "fast-xml-parser": "^4.3.6"
+    "@eslint/js": "^9.13.0",
+    "@stylistic/eslint-plugin": "^2.9.0",
+    "@types/node": "^22",
+    "@types/vscode": "^1.100.0",
+    "eslint": "^9.13.0",
+    "fast-xml-parser": "^5.2.5",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.39.0"
   }
 }

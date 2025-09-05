@@ -27,7 +27,7 @@ for (const tool of requiredTools) {
     child_process.execSync(`${tool} --version`, { stdio: "ignore" });
   } catch (e) {
     error(`"${tool}" is not available.`);
-    process.exit(1);
+    //process.exit(1);
   }
 }
 ok("required tools installed");

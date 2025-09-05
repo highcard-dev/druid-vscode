@@ -24,6 +24,7 @@
   "additionalBuiltinExtensions": [
     {
       "scheme": "http",
+      "authority": "editor.druid.gg",
       "path": "/static/extensions/webdav-fsprovider"
     }
   ]
