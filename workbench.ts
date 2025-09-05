@@ -4,8 +4,8 @@ import {
   ColorScheme,
   IWorkbenchConstructionOptions,
 } from "vs/workbench/browser/web.api";
-import { IWorkspace, IWorkspaceProvider } from "vs/workbench/browser/web.api";
 import { ISecretStorageProvider } from "vs/platform/secrets/common/secrets";
+import { IWorkspace, IWorkspaceProvider } from "vs/workbench/browser/web.api";
 
 declare const window: any;
 
@@ -133,7 +133,7 @@ export class LocalStorageSecretStorageProvider
   if (window.product) {
     config = window.product;
   } else {
-    const result = await fetch("/product.json");
+    const result = await fetch("product.json");
     config = await result.json();
   }
 
