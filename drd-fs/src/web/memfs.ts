@@ -185,8 +185,6 @@ export class MemFS implements FileSystemProvider, Disposable {
 
   root = new Directory(Uri.parse("memfs:/"), "");
 
-  // --- manage file metadata
-
   async stat(uri: Uri): Promise<FileStat> {
     const data = await this.readDavDirectory(uri.path);
 
@@ -205,25 +203,24 @@ export class MemFS implements FileSystemProvider, Disposable {
     const list = await this.readDavDirectory(uri.path);
 
     const { prefix = "" } = this.webdavOptions || {};
-
     const filtered = list
-      .filter((item) => !!prefix && item.href !== prefix)
-      .filter((item) => !!prefix && item.href !== prefix + "/")
+      .filter((item) => !prefix || item.href !== prefix)
+      .filter((item) => !prefix || item.href !== prefix + "/")
       .filter((item) => item.href !== prefix + uri.path)
-      .filter((item) => item.href !== prefix + uri.path + "/")
-      .map((item) => {
-        let fullpath = item.href;
+      .filter((item) => item.href !== prefix + uri.path + "/");
 
-        if (fullpath.endsWith("/")) {
-          fullpath = fullpath.slice(0, -1);
-        }
+    return filtered.map((item) => {
+      let fullpath = item.href;
 
-        return [
-          fullpath.split("/").pop(),
-          !item.isDir ? FileType.File : FileType.Directory,
-        ] as [string, FileType];
-      });
-    return filtered;
+      if (fullpath.endsWith("/")) {
+        fullpath = fullpath.slice(0, -1);
+      }
+
+      return [
+        fullpath.split("/").pop(),
+        !item.isDir ? FileType.File : FileType.Directory,
+      ] as [string, FileType];
+    });
   }
 
   // --- manage file contents
@@ -245,7 +242,7 @@ export class MemFS implements FileSystemProvider, Disposable {
   ) {
     await this.davRequest(uri.path, {
       method: "PUT",
-      body: content,
+      body: content as any,
     });
   }
 

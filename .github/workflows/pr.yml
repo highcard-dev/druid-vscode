@@ -13,7 +13,7 @@ jobs:
       - name: Install
         run: yarn install
       - name: Install provider
-        run: cd drd-fsprovider && yarn install
+        run: cd drd-fs && yarn install
       - name: Build
         run: yarn build
       - name: Copy files into final directory

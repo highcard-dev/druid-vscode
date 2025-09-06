@@ -6,7 +6,7 @@
 		},
 		{
 			"name": "🖥️ Druid FS Extension",
-			"path": "./drd-fsprovider"
+			"path": "./drd-fs"
 		},
 		{
 			"name": "🌐 VS Code Web",
