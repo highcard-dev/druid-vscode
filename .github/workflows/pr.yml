@@ -8,13 +8,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Install Vercel CLI
-        run: npm install --global vercel@latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
       - name: Install
-        run: yarn install
+        run: npm install
       - name: Install provider
-        run: cd drd-fs && yarn install
+        run: cd drd-fs && npm install
       - name: Build
-        run: yarn build
+        run: npm run build
       - name: Copy files into final directory
-        run: yarn prepare-start
+        run: npm run prepare-start

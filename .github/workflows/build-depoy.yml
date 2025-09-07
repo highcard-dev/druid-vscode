@@ -10,17 +10,17 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
       - name: Install deps
         run: sudo apt-get install -y libkrb5-dev g++ gcc make pkg-config libx11-dev libxkbfile-dev libsecret-1-dev
       - name: Install
-        run: yarn install
+        run: npm install
       - name: Install provider
-        run: cd drd-fs && yarn
+        run: cd drd-fs && npm install
       - name: Build
-        run: yarn build
+        run: npm run build
       - name: Copy files into final directory
-        run: yarn prepare-start
+        run: npm run prepare-start
       - name: Deploy
         uses: cloudflare/wrangler-action@v3
         with:

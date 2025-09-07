@@ -20,7 +20,7 @@ function exec(cmd, opts) {
   return child_process.execSync(cmd, opts);
 }
 
-const requiredTools = ["node", "yarn", "git", "python"];
+const requiredTools = ["node", "npm", "git", "python"];
 note(`required tools ${JSON.stringify(requiredTools)}`);
 for (const tool of requiredTools) {
   try {
@@ -56,7 +56,7 @@ note("changing directory to vscode");
 process.chdir("vscode");
 
 if (!fs.existsSync("node_modules")) {
-  exec("yarn", {
+  exec("npm install", {
     stdio: "inherit",
     env: {
       ...process.env,
@@ -65,7 +65,7 @@ if (!fs.existsSync("node_modules")) {
     },
   });
 } else {
-  ok("node_modules exists. Skipping yarn");
+  ok("node_modules exists. Skipping npm install");
 }
 
 // Use simple workbench
@@ -77,7 +77,7 @@ fs.copyFileSync(
 
 // Compile
 note("starting compile");
-exec("yarn gulp vscode-web-min", { stdio: "inherit" });
+exec("npx gulp vscode-web-min", { stdio: "inherit" });
 ok("compile completed");
 
 // Extract compiled files

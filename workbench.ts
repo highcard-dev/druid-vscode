@@ -1,11 +1,12 @@
-import { create } from "vs/workbench/workbench.web.main";
-import { URI, UriComponents } from "vs/base/common/uri";
+import { create } from "../../../workbench/browser/web.factory.js";
 import {
   ColorScheme,
   IWorkbenchConstructionOptions,
-} from "vs/workbench/browser/web.api";
-import { ISecretStorageProvider } from "vs/platform/secrets/common/secrets";
-import { IWorkspace, IWorkspaceProvider } from "vs/workbench/browser/web.api";
+  IWorkspace,
+  IWorkspaceProvider,
+} from "../../../workbench/browser/web.api.js";
+import { ISecretStorageProvider } from "../../../platform/secrets/common/secrets.js";
+import { URI, UriComponents } from "../../../base/common/uri.js";
 
 declare const window: any;
 

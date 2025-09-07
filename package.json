@@ -1,6 +1,6 @@
 {
   "name": "druid-vscode",
-  "version": "1.92.0",
+  "version": "1.103.0",
   "description": "Visual Studio Code for browser",
   "files": [
     "dist"

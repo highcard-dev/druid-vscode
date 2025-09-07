@@ -117,3 +117,4 @@ drd-vscode/playground.js
 .wrangler
 
 DavLock
+.DS_Store
