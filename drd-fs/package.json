@@ -9,7 +9,10 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onFileSystem:memfs",
+    "onDebug"
+  ],
   "browser": "./dist/web/extension.js",
   "contributes": {
     "commands": [
