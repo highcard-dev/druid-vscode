@@ -19,3 +19,9 @@ jobs:
         run: npm run build
       - name: Copy files into final directory
         run: npm run prepare-start
+      - name: Deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          command: |
+            wrangler versions upload --preview-alias pr-${{ github.event.number }}

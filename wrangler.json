@@ -6,6 +6,7 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "druid-vscode",
   "compatibility_date": "2025-01-09",
+  "preview_urls": true,
   "assets": {
     "directory": "./drd-vscode"
   },
