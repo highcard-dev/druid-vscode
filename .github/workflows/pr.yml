@@ -11,6 +11,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Install deps
+        run: sudo apt-get install -y libkrb5-dev g++ gcc make pkg-config libx11-dev libxkbfile-dev libsecret-1-dev
       - name: Install
         run: npm install
       - name: Install provider
