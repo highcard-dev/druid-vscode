@@ -1,13 +1,14 @@
 name: Cloudflare Preview Deployment
 on:
-  push:
-    branches-ignore:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
       - main
 jobs:
   Deploy-Preview:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -22,8 +23,15 @@ jobs:
       - name: Copy files into final directory
         run: npm run prepare-start
       - name: Deploy
+        id: deploy
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          command: |
-            wrangler versions upload --preview-alias pr-${{ github.event.number }}
+          command: versions upload --preview-alias pr-${{ github.event.number }}
+      - name: 📬 Update deployment status
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          append: true
+          # Only `deployment-url` is available
+          message: |
+            | ${{ matrix.name }} | ${{ steps.deploy.outputs.deployment-url }} |
