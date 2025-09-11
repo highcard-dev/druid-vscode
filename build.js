@@ -70,24 +70,12 @@ if (!fs.existsSync("node_modules")) {
 
 // Use simple workbench
 note("copying workbench file");
-fs.copyFileSync(
+/*fs.copyFileSync(
   "../workbench.ts",
   "src/vs/code/browser/workbench/workbench.ts"
-);
+);*/
 
 // Compile
 note("starting compile");
-exec("npx gulp vscode-web-min", { stdio: "inherit" });
+exec("npm run gulp vscode-web-min", { stdio: "inherit" });
 ok("compile completed");
-
-// Extract compiled files
-if (fs.existsSync("../dist")) {
-  note("cleaning ../dist");
-  fs.rmdirSync("../dist", { recursive: true });
-} else {
-  ok("../dist did not exist. No need to clean");
-}
-
-fs.mkdirSync("../dist");
-fse.copySync("../vscode-web", "../dist");
-ok("copied ../vscode-web to ../dist");

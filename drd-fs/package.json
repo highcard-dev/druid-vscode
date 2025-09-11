@@ -1,6 +1,7 @@
 {
   "name": "drd-fs",
   "displayName": "drd-fs",
+  "publisher": "druid",
   "description": "",
   "version": "0.0.1",
   "engines": {
