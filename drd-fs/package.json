@@ -1,6 +1,6 @@
 {
   "name": "drd-fs",
-  "displayName": "drd-fs",
+  "displayName": "Druid Filesystem",
   "publisher": "druid",
   "description": "",
   "version": "0.0.1",
@@ -16,12 +16,16 @@
   ],
   "browser": "./dist/web/extension.js",
   "contributes": {
-    "commands": [
-      {
-        "command": "drd-fs.helloWorld",
-        "title": "Hello World"
+    "configuration": {
+      "title": "Druid Filesystem",
+      "properties": {
+        "druidfsprovider.apikey": {
+          "type": "string",
+          "default": "",
+          "description": "API Key for Druid Filesystem"
+        }
       }
-    ]
+    }
   },
   "scripts": {
     "test": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=. --extensionTestsPath=dist/web/test/suite/index.js",
