@@ -52,6 +52,16 @@ if (!fs.existsSync("vscode")) {
   note("delete vscode folder to clone again");
 }
 
+//replace max-old-space-size=8192 with 4096 in package.json
+
+const vscodePackagePath = "vscode/package.json";
+let packageContent = fs.readFileSync(vscodePackagePath).toString();
+packageContent = packageContent.replace(
+  /max-old-space-size=8192/g,
+  "max-old-space-size=4096"
+);
+fs.writeFileSync(vscodePackagePath, packageContent);
+
 note("changing directory to vscode");
 process.chdir("vscode");
 
