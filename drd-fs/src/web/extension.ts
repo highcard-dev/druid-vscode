@@ -62,6 +62,10 @@ export async function activate(context: vscode.ExtensionContext) {
   let webdavUrl = await context.secrets.get("druidfsprovider.webdavUrl");
   let pathPrefix = await context.secrets.get("druidfsprovider.pathPrefix");
 
+  const test = sessionStorage?.getItem("druidfsprovider.apikey");
+
+  console.log("test", test, sessionStorage);
+
   if ((!apikey && !accessToken) || !webdavUrl) {
     while (!webdavUrl || !isValidHttpUrl(webdavUrl)) {
       webdavUrl = await vscode.window.showInputBox({
@@ -92,6 +96,9 @@ export async function activate(context: vscode.ExtensionContext) {
       "vscode.open",
       vscode.Uri.parse(`memfs:/deployment`)
     );*/
+    vscode.workspace.registerFileSystemProvider("memfs", memFs, {
+      isCaseSensitive: true,
+    });
     vscode.window.showInformationMessage("Connected to remote server.");
   } catch (e) {
     const error = e as Error;

@@ -17,6 +17,7 @@
         colorScheme: "dark",
       });
 
+      sessionStorage.setItem("druidfsprovider.apikey", "test");
       require(["vs/workbench/workbench.web.main"], (workbench) => {
         workbench.create(document.getElementById("root"), {
           productConfiguration: {
