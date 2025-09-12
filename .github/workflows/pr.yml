@@ -1,22 +1,40 @@
 name: Cloudflare Preview Deployment
 on:
-  push:
-    branches-ignore:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
       - main
 jobs:
   Deploy-Preview:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Install Vercel CLI
-        run: npm install --global vercel@latest
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install deps
+        run: sudo apt-get install -y libkrb5-dev g++ gcc make pkg-config libx11-dev libxkbfile-dev libsecret-1-dev
+      #      - name: Setup upterm session
+      #        uses: owenthereal/action-upterm@v1
       - name: Install
-        run: yarn install
+        run: npm install
       - name: Install provider
-        run: cd drd-fsprovider && yarn install
+        run: cd drd-fs && npm install
       - name: Build
-        run: yarn build
+        run: npm run build
       - name: Copy files into final directory
-        run: yarn prepare-start
-      #- name: Deploy Project Artifacts to Vercel
-      #  run: vercel deploy drd-vscode --token=${{ secrets.VERCEL_TOKEN }}
+        run: npm run prepare-start
+      - name: Deploy
+        id: deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          wranglerVersion: "4.35.0"
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          command: versions upload --preview-alias pr-${{ github.event.number }}
+      - name: 📬 Update deployment status
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          append: true
+          # Only `deployment-url` is available
+          message: |
+            | ${{ matrix.name }} | ${{ steps.deploy.outputs.deployment-url }} |

@@ -1,18 +1,8 @@
-var fs = require("fs");
-const fse = require("fs-extra");
 const child_process = require("child_process");
 
-if (fs.existsSync("./drd-vscode/static")) {
-  fs.rmdirSync("./drd-vscode/static", { recursive: true });
-}
+const webPlaygroundPath = "./vscode-web/extensions/webdav-fsprovider";
 
-fse.copySync("./dist/extensions", "./drd-vscode/static/extensions");
-fse.copySync("./dist/node_modules", "./drd-vscode/static/node_modules");
-fse.copySync("./dist/out", "./drd-vscode/static/out");
-
-const webPlaygroundPath = "./drd-vscode/static/extensions/webdav-fsprovider";
-
-child_process.execSync(`bash -c 'cd drd-fsprovider && npm run compile-web'`, {
+child_process.execSync(`bash -c 'cd drd-fs && npm run compile-web'`, {
   stdio: "inherit",
 });
 
@@ -20,6 +10,10 @@ child_process.execSync(`rm -rf ${webPlaygroundPath}`, {
   stdio: "inherit",
 });
 
-child_process.execSync(`cp -r drd-fsprovider ${webPlaygroundPath}`, {
+child_process.execSync(`cp -r drd-fs ${webPlaygroundPath}`, {
+  stdio: "inherit",
+});
+
+child_process.execSync(`cp index.html ./vscode-web/index.html`, {
   stdio: "inherit",
 });

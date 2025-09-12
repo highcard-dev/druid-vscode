@@ -1,0 +1,24 @@
+{
+	"folders": [
+		{
+			"name": "ROOT",
+			"path": "./"
+		},
+		{
+			"name": "🖥️ Druid FS Extension",
+			"path": "./drd-fs"
+		},
+		{
+			"name": "⚙️ VS Code",
+			"path": "./vscode"
+		},
+		{
+			"name": "⚙️ VS Code Web",
+			"path": "./vscode-web"
+		},
+		{
+			"name": "🛠️ WebDAV Utils",
+			"path": "./webdav-utils"
+		}
+	],
+}

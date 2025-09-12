@@ -107,11 +107,9 @@ vscode
 vscode/*
 vscode-web
 dist
-drd-vscode/static
-drd-vscode/code-*
-drd-vscode/favicon.ico
-drd-vscode/manifest.json
-drd-vscode/playground.js
 
 .vscode-test-web
 .wrangler
+
+DavLock
+.DS_Store
