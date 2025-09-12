@@ -6,7 +6,7 @@ on:
       - main
 jobs:
   Deploy-Preview:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -14,12 +14,12 @@ jobs:
           node-version: 22
       - name: Install deps
         run: sudo apt-get install -y libkrb5-dev g++ gcc make pkg-config libx11-dev libxkbfile-dev libsecret-1-dev
+      - name: Setup upterm session
+        uses: owenthereal/action-upterm@v1
       - name: Install
         run: npm install
       - name: Install provider
         run: cd drd-fs && npm install
-      - name: Setup upterm session
-        uses: owenthereal/action-upterm@v1
       - name: Build
         run: npm run build
       - name: Copy files into final directory
