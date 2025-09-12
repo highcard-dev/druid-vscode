@@ -11,8 +11,7 @@
     "Other"
   ],
   "activationEvents": [
-    "onFileSystem:memfs",
-    "onDebug"
+    "*"
   ],
   "browser": "./dist/web/extension.js",
   "contributes": {
