@@ -43,7 +43,8 @@
           },
           additionalBuiltinExtensions: [
             {
-              scheme: "http",
+              scheme: window.location.protocol === "http:" ? "http" : "https",
+              authority: window.location.host,
               path: "/extensions/webdav-fsprovider",
             },
           ],
