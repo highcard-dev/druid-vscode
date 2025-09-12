@@ -9,16 +9,12 @@
 			"path": "./drd-fs"
 		},
 		{
-			"name": "🌐 VS Code Web",
-			"path": "./drd-vscode"
-		},
-		{
-			"name": "⚙️ VS Code Source",
+			"name": "⚙️ VS Code",
 			"path": "./vscode"
 		},
 		{
-			"name": "🌊 Druid",
-			"path": "./druid"
+			"name": "⚙️ VS Code Web",
+			"path": "./vscode-web"
 		},
 		{
 			"name": "🛠️ WebDAV Utils",

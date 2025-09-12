@@ -13,3 +13,7 @@ child_process.execSync(`rm -rf ${webPlaygroundPath}`, {
 child_process.execSync(`cp -r drd-fs ${webPlaygroundPath}`, {
   stdio: "inherit",
 });
+
+child_process.execSync(`cp index.html ./vscode-web/index.html`, {
+  stdio: "inherit",
+});
