@@ -62,54 +62,26 @@ export async function activate(context: vscode.ExtensionContext) {
   let webdavUrl = await context.secrets.get("druidfsprovider.webdavUrl");
   let pathPrefix = await context.secrets.get("druidfsprovider.pathPrefix");
 
-  const test = sessionStorage?.getItem("druidfsprovider.apikey");
+  context.messagePassingProtocol?.onDidReceiveMessage(async (message) => {
+    console.log("Received message:", message);
+    if (message.type === "setCredentials") {
+      apikey = message.payload.apikey;
+      accessToken = message.payload.accessToken;
+      webdavUrl = message.payload.webdavUrl as string;
+      pathPrefix = message.payload.pathPrefix;
 
-  console.log("test", test, sessionStorage);
-
-  if ((!apikey && !accessToken) || !webdavUrl) {
-    while (!webdavUrl || !isValidHttpUrl(webdavUrl)) {
-      webdavUrl = await vscode.window.showInputBox({
-        placeHolder: "Enter the webdavUrl ",
-        prompt: "Enter the webdavUrl",
-        validateInput(value) {
-          return isValidHttpUrl(value) ? "" : "Invalid URL";
-        },
+      vscode.window.showInformationMessage("Connecting to remote server...");
+      const memFs = await enableFs(context, webdavUrl, {
+        basicAuthApikey: apikey,
+        accessToken,
+        prefix: pathPrefix,
       });
-    }
-    while (!apikey) {
-      apikey = await vscode.window.showInputBox({
-        placeHolder: "Enter the apikey ",
-        prompt: "Enter the apikey",
+      vscode.workspace.registerFileSystemProvider("memfs", memFs, {
+        isCaseSensitive: true,
       });
+      vscode.window.showInformationMessage("Connected to remote server.");
     }
-  }
-
-  try {
-    vscode.window.showInformationMessage("Connecting to remote server...");
-    const memFs = await enableFs(context, webdavUrl, {
-      basicAuthApikey: apikey,
-      accessToken,
-      prefix: pathPrefix,
-    });
-    /*
-    vscode.commands.executeCommand(
-      "vscode.open",
-      vscode.Uri.parse(`memfs:/deployment`)
-    );*/
-    vscode.workspace.registerFileSystemProvider("memfs", memFs, {
-      isCaseSensitive: true,
-    });
-    vscode.window.showInformationMessage("Connected to remote server.");
-  } catch (e) {
-    const error = e as Error;
-    //error pops up a message box with the error message,
-    //if the connection to the remote server fails
-
-    vscode.window.showErrorMessage(
-      "Failed to connect to remote server: " + error.message,
-      { modal: true }
-    );
-  }
+  });
 }
 
 // This method is called when your extension is deactivated

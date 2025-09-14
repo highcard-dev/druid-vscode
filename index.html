@@ -11,6 +11,12 @@
     <script src="./out/nls.messages.js"></script>
     <script src="./out/vs/loader.js"></script>
     <script>
+      const message = new MessageChannel();
+
+      const messagePorts = new Map();
+
+      messagePorts.set("druid.drd-fs", message.port2);
+
       // Configure loader with base URL only
       require.config({
         baseUrl: window.location.origin + "/out",
@@ -49,6 +55,17 @@
               path: "/extensions/webdav-fsprovider",
             },
           ],
+          messagePorts,
+        });
+
+        message.port1.postMessage({
+          type: "setCredentials",
+          payload: {
+            apikey: "test",
+            accessToken: "",
+            webdavUrl: "https://webdav.druid.sh",
+            pathPrefix: "/remote.php/dav/files/marc/",
+          },
         });
       });
     </script>
