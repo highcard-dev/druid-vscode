@@ -58,6 +58,19 @@
           messagePorts,
         });
 
+        message.port1.onmessage = (event) => {
+          console.log("Main received message:", event.data);
+          message.port1.postMessage({
+            type: "setCredentials",
+            payload: {
+              apikey: "test",
+              accessToken: "",
+              webdavUrl: "https://webdav.druid.sh",
+              pathPrefix: "/remote.php/dav/files/marc/",
+            },
+          });
+        };
+
         message.port1.postMessage({
           type: "setCredentials",
           payload: {

@@ -62,6 +62,8 @@ export async function activate(context: vscode.ExtensionContext) {
   let webdavUrl = await context.secrets.get("druidfsprovider.webdavUrl");
   let pathPrefix = await context.secrets.get("druidfsprovider.pathPrefix");
 
+  context.messagePassingProtocol?.postMessage({ type: "ready" });
+
   context.messagePassingProtocol?.onDidReceiveMessage(async (message) => {
     console.log("Received message:", message);
     if (message.type === "setCredentials") {
