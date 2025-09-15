@@ -27,6 +27,13 @@
       require(["vs/workbench/workbench.web.main"], (workbench) => {
         workbench.create(document.getElementById("root"), {
           productConfiguration: {
+            extensionEnabledApiProposals: {
+              "druid.drd-fs": [
+                "fileSearchProvider",
+                "textSearchProvider",
+                "ipc",
+              ],
+            },
             nameShort: "Druid Web Editor",
             nameLong: "Druid Web Editor",
             applicationName: "code-web",
@@ -36,12 +43,6 @@
               itemUrl: "https://open-vsx.org/vscode/item",
               resourceUrlTemplate:
                 "https://openvsxorg.blob.core.windows.net/resources/{publisher}/{name}/{version}/{path}",
-            },
-            extensionEnabledApiProposals: {
-              "vscode.vscode-web-playground": [
-                "fileSearchProvider",
-                "textSearchProvider",
-              ],
             },
           },
           folderUri: {
