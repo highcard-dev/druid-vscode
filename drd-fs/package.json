@@ -55,5 +55,10 @@
   },
   "dependencies": {
     "fast-xml-parser": "^5.2.5"
-  }
+  },
+  "enabledApiProposals": [
+    "fileSearchProvider",
+    "textSearchProvider",
+    "ipc"
+  ]
 }
