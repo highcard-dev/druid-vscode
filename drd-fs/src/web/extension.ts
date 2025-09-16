@@ -78,6 +78,11 @@ export async function activate(context: vscode.ExtensionContext) {
         accessToken,
         prefix: pathPrefix,
       });
+
+      vscode.workspace.updateWorkspaceFolders(0, 0, {
+        uri: vscode.Uri.parse("memfs:/"),
+        name: "Druid - Filesystem",
+      });
       //vscode.workspace.registerFileSystemProvider("memfs", memFs, {
       //  isCaseSensitive: true,
       //});
