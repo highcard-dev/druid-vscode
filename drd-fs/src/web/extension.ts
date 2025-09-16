@@ -78,9 +78,9 @@ export async function activate(context: vscode.ExtensionContext) {
         accessToken,
         prefix: pathPrefix,
       });
-      vscode.workspace.registerFileSystemProvider("memfs", memFs, {
-        isCaseSensitive: true,
-      });
+      //vscode.workspace.registerFileSystemProvider("memfs", memFs, {
+      //  isCaseSensitive: true,
+      //});
       vscode.window.showInformationMessage("Connected to remote server.");
     }
   });

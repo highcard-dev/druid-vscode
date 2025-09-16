@@ -11,6 +11,25 @@
     <script src="./out/nls.messages.js"></script>
     <script src="./out/vs/loader.js"></script>
     <script>
+      function getCookie(name) {
+        const value = "; " + document.cookie;
+        const parts = value.split("; " + name + "=");
+
+        if (parts.length == 2) {
+          return parts.pop()?.split(";").shift();
+        }
+        return null;
+      }
+
+      export function deleteCookie(name) {
+        const date = new Date();
+        // Set it expire in -1 days
+        date.setTime(date.getTime() + -1 * 24 * 60 * 60 * 1000);
+        // Set it
+        document.cookie =
+          name + "=; expires=" + date.toUTCString() + "; path=/";
+      }
+
       const message = new MessageChannel();
 
       const messagePorts = new Map();
@@ -61,13 +80,20 @@
 
         message.port1.onmessage = (event) => {
           console.log("Main received message:", event.data);
+          const credentialsData = getCookie("vscode-workbench-web-secrets");
+          if (!credentials) {
+            console.error("No credentials found");
+            return;
+          }
+          const credentials = JSON.parse(credentialsData);
+
           message.port1.postMessage({
             type: "setCredentials",
             payload: {
-              apikey: "test",
-              accessToken: "",
-              webdavUrl: "https://webdav.druid.sh",
-              pathPrefix: "/remote.php/dav/files/marc/",
+              apikey: credentials.apikey,
+              accessToken: credentials.accessToken,
+              webdavUrl: credentials.webDavUrl,
+              pathPrefix: credentials.pathPrefix,
             },
           });
         };
@@ -75,7 +101,6 @@
         message.port1.postMessage({
           type: "setCredentials",
           payload: {
-            apikey: "test",
             accessToken: "",
             webdavUrl: "https://webdav.druid.sh",
             pathPrefix: "/remote.php/dav/files/marc/",
