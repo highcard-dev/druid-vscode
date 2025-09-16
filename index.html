@@ -81,7 +81,7 @@
         message.port1.onmessage = (event) => {
           console.log("Main received message:", event.data);
           const credentialsData = getCookie("vscode-workbench-web-secrets");
-          if (!credentials) {
+          if (!credentialsData) {
             console.error("No credentials found");
             return;
           }
@@ -97,15 +97,6 @@
             },
           });
         };
-
-        message.port1.postMessage({
-          type: "setCredentials",
-          payload: {
-            accessToken: "",
-            webdavUrl: "https://webdav.druid.sh",
-            pathPrefix: "/remote.php/dav/files/marc/",
-          },
-        });
       });
     </script>
   </body>
