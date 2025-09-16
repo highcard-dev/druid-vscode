@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VS Code Web</title>
+    <link rel="stylesheet" href="./out/vs/workbench/workbench.web.main.css" />
+  </head>
+  <body style="margin: 0; height: 100vh">
+    <div id="root" style="height: 100vh; width: 100vw"></div>
+    <script src="./out/nls.messages.js"></script>
+    <script src="./out/vs/loader.js"></script>
+    <script>
+      function getCookie(name) {
+        const value = "; " + document.cookie;
+        const parts = value.split("; " + name + "=");
+
+        if (parts.length == 2) {
+          return parts.pop()?.split(";").shift();
+        }
+        return null;
+      }
+
+      function deleteCookie(name) {
+        const date = new Date();
+        // Set it expire in -1 days
+        date.setTime(date.getTime() + -1 * 24 * 60 * 60 * 1000);
+        // Set it
+        document.cookie =
+          name + "=; expires=" + date.toUTCString() + "; path=/";
+      }
+
+      const message = new MessageChannel();
+
+      const messagePorts = new Map();
+
+      messagePorts.set("druid.drd-fs", message.port2);
+
+      // Configure loader with base URL only
+      require.config({
+        baseUrl: window.location.origin + "/out",
+        colorScheme: "dark",
+      });
+
+      sessionStorage.setItem("druidfsprovider.apikey", "test");
+      require(["vs/workbench/workbench.web.main"], (workbench) => {
+        workbench.create(document.getElementById("root"), {
+          productConfiguration: {
+            extensionEnabledApiProposals: {
+              "druid.drd-fs": [
+                "fileSearchProvider",
+                "textSearchProvider",
+                "ipc",
+              ],
+            },
+            nameShort: "Druid Web Editor",
+            nameLong: "Druid Web Editor",
+            applicationName: "code-web",
+            dataFolderName: ".vscode-web",
+            extensionsGallery: {
+              serviceUrl: "https://open-vsx.org/vscode/gallery",
+              itemUrl: "https://open-vsx.org/vscode/item",
+              resourceUrlTemplate:
+                "https://openvsxorg.blob.core.windows.net/resources/{publisher}/{name}/{version}/{path}",
+            },
+          },
+          folderUri: {
+            scheme: "memfs",
+            path: "/",
+          },
+          additionalBuiltinExtensions: [
+            {
+              scheme: window.location.protocol === "http:" ? "http" : "https",
+              authority: window.location.host,
+              path: "/extensions/webdav-fsprovider",
+            },
+          ],
+          messagePorts,
+        });
+
+        message.port1.onmessage = (event) => {
+          console.log("Main received message:", event.data);
+          const credentialsData = getCookie("vscode-workbench-web-secrets");
+          if (!credentialsData) {
+            console.error("No credentials found");
+            return;
+          }
+          const credentials = JSON.parse(credentialsData);
+
+          message.port1.postMessage({
+            type: "setCredentials",
+            payload: {
+              apikey: credentials.apikey,
+              accessToken: credentials.accessToken,
+              webdavUrl: credentials.webDavUrl,
+              pathPrefix: credentials.pathPrefix,
+            },
+          });
+        };
+      });
+    </script>
+  </body>
+</html>

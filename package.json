@@ -1,6 +1,7 @@
 {
   "name": "druid-vscode",
-  "version": "1.87.2",
+  "version": "1.103.0",
+  "description": "Visual Studio Code for browser",
   "files": [
     "dist"
   ],
@@ -15,6 +16,9 @@
   },
   "devDependencies": {
     "fs-extra": "^11.2.0",
-    "wrangler": "^3.103.2"
-  }
+    "wrangler": "^3.103.2",
+    "express": "^4.17.1"
+  },
+  "dependencies": {},
+  "packageManager": "yarn@1.22.19+sha1.4ba7fc5c6e704fce2066ecbfb0b0d8976fe62447"
 }
