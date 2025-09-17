@@ -3,18 +3,6 @@
 import * as vscode from "vscode";
 import { MemFS, WebDavOptions } from "./memfs";
 
-function isValidHttpUrl(str: string) {
-  let url;
-
-  try {
-    url = new URL(str);
-  } catch (_) {
-    return false;
-  }
-
-  return url.protocol === "http:" || url.protocol === "https:";
-}
-
 async function enableFs(
   context: vscode.ExtensionContext,
   webdavUrl: string,
@@ -63,7 +51,7 @@ export async function activate(context: vscode.ExtensionContext) {
   let pathPrefix = await context.secrets.get("druidfsprovider.pathPrefix");
 
   context.messagePassingProtocol?.postMessage({ type: "ready" });
-
+  let memFs: MemFS | undefined = undefined;
   context.messagePassingProtocol?.onDidReceiveMessage(async (message) => {
     console.log("Received message:", message);
     if (message.type === "setCredentials") {
@@ -72,8 +60,18 @@ export async function activate(context: vscode.ExtensionContext) {
       webdavUrl = message.payload.webdavUrl as string;
       pathPrefix = message.payload.pathPrefix;
 
+      if (memFs) {
+        await memFs.updateCredentials({
+          basicAuthApikey: apikey,
+          accessToken,
+          prefix: pathPrefix,
+        });
+        console.log("Updated credentials for MemFS");
+        return;
+      }
+
       vscode.window.showInformationMessage("Connecting to remote server...");
-      const memFs = await enableFs(context, webdavUrl, {
+      memFs = await enableFs(context, webdavUrl, {
         basicAuthApikey: apikey,
         accessToken,
         prefix: pathPrefix,

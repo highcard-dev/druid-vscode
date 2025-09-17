@@ -62,8 +62,6 @@ export class Directory implements FileStat {
 
 export type Entry = File | Directory;
 
-const textEncoder = new TextEncoder();
-
 export class MemFS implements FileSystemProvider, Disposable {
   static scheme = "memfs";
   private wedavUrl: string;
@@ -269,6 +267,10 @@ export class MemFS implements FileSystemProvider, Disposable {
     await this.davRequest(uri.path, {
       method: "MKCOL",
     });
+  }
+
+  async updateCredentials(options: WebDavOptions) {
+    this.webdavOptions = options;
   }
 
   onDidChangeFile() {

@@ -1,22 +1,22 @@
 {
-    "compilerOptions": {
-        "module": "amd",
-        "moduleResolution": "node",
-        "experimentalDecorators": true,
-		"noImplicitReturns": true,
-		"noUnusedLocals": true,
-		"allowUnreachableCode": false,
-		"strict": true,
+	"compilerOptions": {
+		"target": "es2021",
+		"lib": ["es2021"],
+		"module": "NodeNext",
+		"moduleResolution": "nodenext",
+		"noEmit": true,
+		"isolatedModules": true,
+		"allowSyntheticDefaultImports": true,
 		"forceConsistentCasingInFileNames": true,
-        "baseUrl": ".",
+		"noUncheckedIndexedAccess": true,
+		"noImplicitOverride": true,
+		"strict": true,
+		"types": ["node"],
+		"skipLibCheck": true,
         "paths": {
             "vs/*": [
                 "./vscode/src/vs/*"
-            ]
-        },
-        "lib": [
-			"ES2015"
-		]
-    },
-    "include": ["workbench.ts"]
+            ]}
+	},
+	"exclude": ["web", "editor-files"]
 }
