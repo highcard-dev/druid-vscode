@@ -93,7 +93,13 @@ export class MemFS implements FileSystemProvider, Disposable {
     this.disposables.forEach((d) => d.dispose());
   }
 
-  private ensureInitialized(): void {
+  private async waitForInitialization(
+    maxWaitMs: number = 10000
+  ): Promise<void> {
+    const startTime = Date.now();
+    while (!this._isInitialized && Date.now() - startTime < maxWaitMs) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
     if (!this._isInitialized) {
       throw FileSystemError.Unavailable(
         "File system not yet initialized. Please configure credentials first."
@@ -202,7 +208,7 @@ export class MemFS implements FileSystemProvider, Disposable {
   root = new Directory(Uri.parse("memfs:/"), "");
 
   async stat(uri: Uri): Promise<FileStat> {
-    this.ensureInitialized();
+    await this.waitForInitialization();
     const data = await this.readDavDirectory(uri.path);
 
     if (data[0]) {
@@ -217,7 +223,7 @@ export class MemFS implements FileSystemProvider, Disposable {
   }
 
   async readDirectory(uri: Uri): Promise<[string, FileType][]> {
-    this.ensureInitialized();
+    await this.waitForInitialization();
     const list = await this.readDavDirectory(uri.path);
 
     const { prefix = "" } = this.webdavOptions || {};
@@ -244,7 +250,7 @@ export class MemFS implements FileSystemProvider, Disposable {
   // --- manage file contents
 
   async readFile(uri: Uri): Promise<Uint8Array> {
-    this.ensureInitialized();
+    await this.waitForInitialization();
     const res = await this.davRequest(uri.path, {
       method: "GET",
       body: undefined,
@@ -259,7 +265,7 @@ export class MemFS implements FileSystemProvider, Disposable {
     content: Uint8Array,
     options: { create: boolean; overwrite: boolean }
   ) {
-    this.ensureInitialized();
+    await this.waitForInitialization();
     await this.davRequest(uri.path, {
       method: "PUT",
       body: content as any,
@@ -269,7 +275,7 @@ export class MemFS implements FileSystemProvider, Disposable {
   // --- manage files/folders
 
   async rename(oldUri: Uri, newUri: Uri, options: { overwrite: boolean }) {
-    this.ensureInitialized();
+    await this.waitForInitialization();
     const { prefix = "" } = this.webdavOptions || {};
 
     await this.davRequest(oldUri.path, {
@@ -281,14 +287,14 @@ export class MemFS implements FileSystemProvider, Disposable {
   }
 
   async delete(uri: Uri) {
-    this.ensureInitialized();
+    await this.waitForInitialization();
     await this.davRequest(uri.path, {
       method: "DELETE",
     });
   }
 
   async createDirectory(uri: Uri) {
-    this.ensureInitialized();
+    await this.waitForInitialization();
     await this.davRequest(uri.path, {
       method: "MKCOL",
     });
