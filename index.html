@@ -12,32 +12,55 @@
     <script src="./out/vs/loader.js"></script>
     <script>
       function getJwtExpiration(token) {
+        console.log("Auth: Parsing JWT token for expiration");
         try {
           const payload = JSON.parse(atob(token.split(".")[1]));
-          return payload.exp;
+          const expiration = payload.exp;
+          const currentTime = Math.floor(Date.now() / 1000);
+          const timeUntilExpiry = expiration - currentTime;
+          console.log(
+            "Auth: JWT token expires at:",
+            new Date(expiration * 1000).toISOString(),
+            "Time until expiry (seconds):",
+            timeUntilExpiry
+          );
+          return expiration;
         } catch (error) {
-          console.error("Failed to parse JWT token:", error);
+          console.error(
+            "Auth: Failed to parse JWT token - invalid format or structure"
+          );
           return 0;
         }
       }
 
       function getCookie(name) {
+        console.log("Auth: Retrieving cookie:", name);
         const value = "; " + document.cookie;
         const parts = value.split("; " + name + "=");
 
         if (parts.length == 2) {
-          return parts.pop()?.split(";").shift();
+          const cookieValue = parts.pop()?.split(";").shift();
+          console.log(
+            "Auth: Cookie found:",
+            name,
+            "Length:",
+            cookieValue?.length || 0
+          );
+          return cookieValue;
         }
+        console.log("Auth: Cookie not found:", name);
         return null;
       }
 
-      function deleteCookie(name) {
-        const date = new Date();
-        // Set it expire in -1 days
-        date.setTime(date.getTime() + -1 * 24 * 60 * 60 * 1000);
-        // Set it
-        document.cookie =
-          name + "=; expires=" + date.toUTCString() + "; path=/";
+      // Helper function to safely log objects without sensitive data
+      function logSafeCredentials(creds) {
+        return {
+          hasApikey: !!creds.apikey,
+          hasAccessToken: !!creds.accessToken,
+          hasRefreshToken: !!creds.refreshToken,
+          hasWebDavUrl: !!creds.webDavUrl,
+          hasPathPrefix: !!creds.pathPrefix,
+        };
       }
 
       const message = new MessageChannel();
@@ -91,22 +114,38 @@
         });
 
         message.port1.onmessage = (event) => {
-          console.log("Main received message:", event.data);
+          console.log(
+            "Auth: Main received message type:",
+            event.data?.type || "unknown"
+          );
           const credentialsData = getCookie("vscode-workbench-web-secrets");
           if (!credentialsData) {
-            console.error("No credentials found");
+            console.error("Auth: No credentials found in cookie");
             return;
           }
 
           let credentials;
           try {
             credentials = JSON.parse(credentialsData);
+            console.log(
+              "Auth: Credentials parsed successfully. Has refresh token:",
+              !!credentials.refreshToken
+            );
+            console.log(
+              "Auth: WebDAV URL configured:",
+              !!credentials.webDavUrl
+            );
+            console.log(
+              "Auth: Path prefix configured:",
+              !!credentials.pathPrefix
+            );
           } catch (error) {
-            console.error("Failed to parse credentials:", error);
+            console.error("Auth: Failed to parse credentials:", error);
             return;
           }
 
           const updateCredentials = (c) => {
+            console.log("Auth: Updating credentials");
             message.port1.postMessage({
               type: "setCredentials",
               payload: {
@@ -116,8 +155,10 @@
                 pathPrefix: c.pathPrefix,
               },
             });
+            console.log("Auth: Credentials sent to extension");
 
             if (c.refreshToken) {
+              console.log("Auth: Setting up token refresh mechanism");
               const exp = getJwtExpiration(c.accessToken);
               const currentTime = Math.floor(Date.now() / 1000);
               const timeUntilRefresh = Math.max(
@@ -125,7 +166,14 @@
                 (exp - currentTime - 60) * 1000
               );
 
+              console.log(
+                "Auth: Token refresh scheduled in",
+                timeUntilRefresh / 1000,
+                "seconds"
+              );
+
               setTimeout(async () => {
+                console.log("Auth: Starting token refresh");
                 try {
                   const response = await fetch(
                     "https://auth.druid.gg/api/v1/refresh",
@@ -138,24 +186,35 @@
                     }
                   );
 
+                  console.log(
+                    "Auth: Token refresh response status:",
+                    response.status
+                  );
+
                   if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                   }
 
                   const refreshData = await response.json();
+                  console.log("Auth: Token refresh successful");
                   updateCredentials({
                     ...credentials,
                     accessToken: refreshData.accessToken,
                     refreshToken: refreshData.refreshToken,
                   });
                 } catch (error) {
-                  console.error("Failed to refresh token:", error);
+                  console.error("Auth: Failed to refresh token:", error);
                   // Could potentially redirect to login or show error message
                 }
               }, timeUntilRefresh);
+            } else {
+              console.log(
+                "Auth: No refresh token available, refresh mechanism not set up"
+              );
             }
           };
           updateCredentials(credentials);
+          console.log("Auth: Initial credentials setup completed");
         };
       });
     </script>
