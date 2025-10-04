@@ -31,10 +31,14 @@ jobs:
           wranglerVersion: "4.35.0"
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           command: versions upload --preview-alias pr-${{ github.event.number }}
-      - name: 📬 Update deployment status
+      - name: 📬 Update PR with deployment preview
         uses: marocchino/sticky-pull-request-comment@v2
         with:
-          append: true
-          # Only `deployment-url` is available
           message: |
-            | ${{ matrix.name }} | ${{ steps.deploy.outputs.deployment-url }} |
+            ## 🚀 Preview Deployment Ready!
+
+            Your changes have been deployed to Cloudflare and are ready for preview:
+
+            **Preview URL:** ${{ steps.deploy.outputs.deployment-url }}
+
+            This preview will be automatically updated when you push new commits to this PR.

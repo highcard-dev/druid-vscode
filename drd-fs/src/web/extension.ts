@@ -3,88 +3,125 @@
 import * as vscode from "vscode";
 import { MemFS, WebDavOptions } from "./memfs";
 
-async function enableFs(
-  context: vscode.ExtensionContext,
-  webdavUrl: string,
-  credentials?: WebDavOptions
-): Promise<MemFS> {
-  const memFs = new MemFS(webdavUrl, credentials);
-
-  try {
-    await memFs.readDavDirectory("/");
-    context.subscriptions.push(memFs);
-
-    return memFs;
-  } catch (e) {
-    memFs.dispose();
-    throw e;
-  }
-}
-
 export async function activate(context: vscode.ExtensionContext) {
-  /*const disposable = vscode.commands.registerCommand(
-    "drd-fs.helloWorld",
-    () => {
-      // The code you place here will be executed every time your command is executed
+  console.log("Druid FS extension is now active!");
+  // Create MemFS instance without auto-registration
+  const memFs = new MemFS("", {}); // Start with empty URL and credentials
 
-      // Display a message box to the user
-      vscode.window.showInformationMessage(
-        "Hello World from drd-fs in a web extension host!"
-      );
-      vscode.workspace.updateWorkspaceFolders(0, 0, {
-        uri: vscode.Uri.parse("memfs:/"),
-        name: "MemFS - Sample",
-      });
+  // Register the file system provider immediately
+  const fsRegistration = vscode.workspace.registerFileSystemProvider(
+    "memfs",
+    memFs,
+    {
+      isCaseSensitive: true,
     }
   );
-  context.subscriptions.push(disposable);
+  context.subscriptions.push(fsRegistration);
+  context.subscriptions.push(memFs);
 
-  //const webdavUrl = "http://localhost:8011";
-  const webdavUrl = "http://localhost:9190/webdav";
-  let apikey = "admin";
-  let accessToken = undefined;
-  let pathPrefix = undefined;*/
+  // Initialize credentials asynchronously and allow file operations to wait
+  initializeCredentials();
 
-  let apikey = await context.secrets.get("druidfsprovider.apikey");
-  let accessToken = await context.secrets.get("druidfsprovider.accessToken");
-  let webdavUrl = await context.secrets.get("druidfsprovider.webdavUrl");
-  let pathPrefix = await context.secrets.get("druidfsprovider.pathPrefix");
+  async function initializeCredentials() {
+    try {
+      // Get stored credentials
+      let apikey = await context.secrets.get("druidfsprovider.apikey");
+      let accessToken = await context.secrets.get(
+        "druidfsprovider.accessToken"
+      );
+      let webdavUrl = await context.secrets.get("druidfsprovider.webdavUrl");
+      let pathPrefix = await context.secrets.get("druidfsprovider.pathPrefix");
+
+      // If we have credentials, configure the MemFS immediately
+      if (webdavUrl && (apikey || accessToken)) {
+        try {
+          memFs.webdavUrl = webdavUrl;
+          await memFs.updateCredentials({
+            basicAuthApikey: apikey,
+            accessToken,
+            prefix: pathPrefix,
+          });
+          await memFs.readDavDirectory("/");
+
+          // Add workspace folder if it's not already added
+          const existingFolder = vscode.workspace.workspaceFolders?.find(
+            (folder) => folder.uri.scheme === "memfs"
+          );
+          if (!existingFolder) {
+            vscode.workspace.updateWorkspaceFolders(0, 0, {
+              uri: vscode.Uri.parse("memfs:/"),
+              name: "Druid - Filesystem",
+            });
+          }
+
+          vscode.window.showInformationMessage("Connected to remote server.");
+        } catch (error) {
+          console.error("Failed to connect to remote server:", error);
+          vscode.window.showErrorMessage(
+            `Failed to connect to remote server: ${error}`
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Failed to initialize credentials:", error);
+    }
+  }
 
   context.messagePassingProtocol?.postMessage({ type: "ready" });
-  let memFs: MemFS | undefined = undefined;
+
   context.messagePassingProtocol?.onDidReceiveMessage(async (message) => {
     console.log("Received message:", message);
     if (message.type === "setCredentials") {
-      apikey = message.payload.apikey;
-      accessToken = message.payload.accessToken;
-      webdavUrl = message.payload.webdavUrl as string;
-      pathPrefix = message.payload.pathPrefix;
+      try {
+        vscode.window.showInformationMessage("Connecting to remote server...");
 
-      if (memFs) {
+        // Store credentials for future sessions
+        await context.secrets.store(
+          "druidfsprovider.apikey",
+          message.payload.apikey || ""
+        );
+        await context.secrets.store(
+          "druidfsprovider.accessToken",
+          message.payload.accessToken || ""
+        );
+        await context.secrets.store(
+          "druidfsprovider.webdavUrl",
+          message.payload.webdavUrl || ""
+        );
+        await context.secrets.store(
+          "druidfsprovider.pathPrefix",
+          message.payload.pathPrefix || ""
+        );
+
+        // Update credentials and URL
+        memFs.webdavUrl = message.payload.webdavUrl as string;
         await memFs.updateCredentials({
-          basicAuthApikey: apikey,
-          accessToken,
-          prefix: pathPrefix,
+          basicAuthApikey: message.payload.apikey,
+          accessToken: message.payload.accessToken,
+          prefix: message.payload.pathPrefix,
         });
-        console.log("Updated credentials for MemFS");
-        return;
+
+        // Test the connection
+        await memFs.readDavDirectory("/");
+
+        // Add workspace folder if it's not already added
+        const existingFolder = vscode.workspace.workspaceFolders?.find(
+          (folder) => folder.uri.scheme === "memfs"
+        );
+        if (!existingFolder) {
+          vscode.workspace.updateWorkspaceFolders(0, 0, {
+            uri: vscode.Uri.parse("memfs:/"),
+            name: "Druid - Filesystem",
+          });
+        }
+
+        vscode.window.showInformationMessage("Connected to remote server.");
+      } catch (error) {
+        console.error("Failed to connect to remote server:", error);
+        vscode.window.showErrorMessage(
+          `Failed to connect to remote server: ${error}`
+        );
       }
-
-      vscode.window.showInformationMessage("Connecting to remote server...");
-      memFs = await enableFs(context, webdavUrl, {
-        basicAuthApikey: apikey,
-        accessToken,
-        prefix: pathPrefix,
-      });
-
-      vscode.workspace.updateWorkspaceFolders(0, 0, {
-        uri: vscode.Uri.parse("memfs:/"),
-        name: "Druid - Filesystem",
-      });
-      //vscode.workspace.registerFileSystemProvider("memfs", memFs, {
-      //  isCaseSensitive: true,
-      //});
-      vscode.window.showInformationMessage("Connected to remote server.");
     }
   });
 }
