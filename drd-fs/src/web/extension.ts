@@ -4,6 +4,7 @@ import * as vscode from "vscode";
 import { MemFS, WebDavOptions } from "./memfs";
 
 export async function activate(context: vscode.ExtensionContext) {
+  console.log("Druid FS extension is now active!");
   // Create MemFS instance without auto-registration
   const memFs = new MemFS("", {}); // Start with empty URL and credentials
 
