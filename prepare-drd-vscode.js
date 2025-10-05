@@ -1,6 +1,6 @@
 const child_process = require("child_process");
 
-const webPlaygroundPath = "./vscode-web/extensions/webdav-fsprovider";
+const webPlaygroundPath = "./vscode-web/drd-fs";
 
 child_process.execSync(`bash -c 'cd drd-fs && npm run compile-web'`, {
   stdio: "inherit",
