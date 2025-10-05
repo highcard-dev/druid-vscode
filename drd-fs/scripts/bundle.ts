@@ -15,17 +15,6 @@ async function buildMain(flags: BuildFlags = {}) {
     format: "cjs",
     external: ["vscode"],
     logLevel: "info",
-    plugins: [
-      {
-        name: "druid-fs-types",
-        setup(build) {
-          // Handle any specific type resolution if needed
-          build.onResolve({ filter: /^fast-xml-parser$/ }, () => {
-            return { path: "fast-xml-parser", external: false };
-          });
-        },
-      },
-    ],
   };
 
   if (flags.watch) {
